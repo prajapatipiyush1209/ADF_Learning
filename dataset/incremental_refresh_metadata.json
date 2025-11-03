@@ -1,0 +1,44 @@
+{
+	"name": "incremental_refresh_metadata",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "incremental_refresh_metadata.json",
+				"fileSystem": "incremental-refersh"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"tables": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"schema_name": {
+								"type": "string"
+							},
+							"table_name": {
+								"type": "string"
+							},
+							"last_refreshed": {
+								"type": "string"
+							},
+							"enable_back_refresh": {
+								"type": "boolean"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
