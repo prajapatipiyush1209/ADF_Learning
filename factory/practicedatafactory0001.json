@@ -1,9 +1,0 @@
-{
-	"name": "practicedatafactory0001",
-	"location": "southeastasia",
-	"identity": {
-		"type": "SystemAssigned",
-		"principalId": "a28fffa2-b533-4fe9-b2db-0a907b939566",
-		"tenantId": "5b15a32c-683d-4048-a1a7-1488d731bdb5"
-	}
-}
