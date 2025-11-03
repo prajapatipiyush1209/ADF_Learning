@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Metadata of the Incremental Referesh",
+				"name": "Metadata of the Incremental Referesh Teerth",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
