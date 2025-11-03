@@ -1,5 +1,5 @@
 {
-	"name": "Incremental_refresh_pipeline",
+	"name": "Incremental_refresh_pipeline_practice",
 	"properties": {
 		"activities": [
 			{
