@@ -5,7 +5,14 @@
 			{
 				"name": "Metadata of the Incremental Referesh",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Set Start Time of the Pipeline",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -13,7 +20,6 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": [],
 				"typeProperties": {
 					"source": {
 						"type": "JsonSource",
@@ -61,7 +67,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "SELECT COUNT(*) AS total_count \nFROM [@{variables('schema_name')}].[@{variables('table_name')}] \nWHERE order_date > '@{activity('Metadata of the Incremental Referesh').output.firstRow.last_refreshed}'\n",
+								"value": "SELECT COUNT(*) AS total_count \nFROM [@{variables('schema_name')}].[@{variables('table_name')}] \nWHERE order_date > '@{activity('Metadata of the Incremental Referesh').output.firstRow.last_refreshed}\n",
 								"type": "Expression"
 							}
 						}
@@ -243,8 +249,63 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "Set Start Time of the Pipeline",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "activity_start_time",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set EndTime of the Pipeline",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "If rows graterthan 0",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "activity_start_time",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
 			}
 		],
+		"parameters": {
+			"start_time": {
+				"type": "string"
+			},
+			"end_time": {
+				"type": "string"
+			},
+			"error_message": {
+				"type": "string"
+			},
+			"flag": {
+				"type": "string"
+			}
+		},
 		"variables": {
 			"schema_name": {
 				"type": "String",
@@ -254,8 +315,29 @@
 				"type": "String",
 				"defaultValue": "Orders"
 			},
-			"Numbers of Rows": {
-				"type": "Integer"
+			"pipeline_start_time": {
+				"type": "String"
+			},
+			"pipeline_end_time": {
+				"type": "String"
+			},
+			"pipeline_error_message": {
+				"type": "String"
+			},
+			"run_type": {
+				"type": "String"
+			},
+			"activity_name": {
+				"type": "String"
+			},
+			"activity_start_time": {
+				"type": "String"
+			},
+			"activity_end_time": {
+				"type": "String"
+			},
+			"activity_error_message": {
+				"type": "String"
 			}
 		},
 		"annotations": [],
