@@ -46,7 +46,10 @@
 							"type": "String"
 						},
 						"run_type": {
-							"value": "Activity Run Type",
+							"value": {
+								"value": "@pipeline().parameters.status",
+								"type": "Expression"
+							},
 							"type": "String"
 						},
 						"start_time": {
@@ -57,7 +60,10 @@
 							"type": "DateTime"
 						},
 						"status": {
-							"value": "Success",
+							"value": {
+								"value": "@pipeline().parameters.status",
+								"type": "Expression"
+							},
 							"type": "String"
 						},
 						"trigger_name": {
@@ -78,7 +84,8 @@
 							"value": {
 								"value": "@pipeline().parameters.run_id",
 								"type": "Expression"
-							}
+							},
+							"type": "String"
 						}
 					}
 				},
@@ -105,6 +112,12 @@
 				"type": "string"
 			},
 			"error_message": {
+				"type": "string"
+			},
+			"status": {
+				"type": "string"
+			},
+			"run_type": {
 				"type": "string"
 			}
 		},
