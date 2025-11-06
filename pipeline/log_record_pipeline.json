@@ -1,0 +1,104 @@
+{
+	"name": "log_record_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "run_stored_procedure_for_record_log",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[pipeline_run_logs]",
+					"storedProcedureParameters": {
+						"activity_name": {
+							"value": {
+								"value": "copy_data_from_database_to_adls",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"end_time": {
+							"value": {
+								"value": "@utcNow()",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"error_message": {
+							"value": null,
+							"type": "String"
+						},
+						"pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"run_type": {
+							"value": "Activity Run Type",
+							"type": "String"
+						},
+						"start_time": {
+							"value": {
+								"value": "@pipeline().parameters.start_time",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"status": {
+							"value": "Success",
+							"type": "String"
+						},
+						"trigger_name": {
+							"value": {
+								"value": "@pipeline().parameters.trigger_name",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"trigger_type": {
+							"value": {
+								"value": "@pipeline().parameters.trigger_type",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"runid": {
+							"value": {
+								"value": "@pipeline().parameters.run_id",
+								"type": "Expression"
+							}
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"start_time": {
+				"type": "string"
+			},
+			"trigger_name": {
+				"type": "string"
+			},
+			"trigger_type": {
+				"type": "string"
+			},
+			"run_id": {
+				"type": "string"
+			}
+		},
+		"annotations": []
+	}
+}
