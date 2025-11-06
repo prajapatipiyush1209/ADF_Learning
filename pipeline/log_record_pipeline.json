@@ -32,7 +32,10 @@
 							"type": "DateTime"
 						},
 						"error_message": {
-							"value": null,
+							"value": {
+								"value": "@pipeline().parameters.error_message",
+								"type": "Expression"
+							},
 							"type": "String"
 						},
 						"pipeline_name": {

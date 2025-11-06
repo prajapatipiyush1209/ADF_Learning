@@ -313,6 +313,10 @@
 									"endtime": {
 										"value": "@formatDateTime(variables('activity_end_time'), 'yyyy-MM-dd HH:mm:ss')\n",
 										"type": "Expression"
+									},
+									"error_message": {
+										"value": "''",
+										"type": "Expression"
 									}
 								}
 							}
@@ -384,7 +388,7 @@
 										"type": "Expression"
 									},
 									"error_message": {
-										"value": "@activity('Metadata of the Incremental Referesh').output.error[0].Message",
+										"value": "@activity('Load Data').output.errors[0].Message  ",
 										"type": "Expression"
 									}
 								}
