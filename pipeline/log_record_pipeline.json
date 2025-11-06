@@ -100,6 +100,9 @@
 			},
 			"endtime": {
 				"type": "string"
+			},
+			"error_message": {
+				"type": "string"
 			}
 		},
 		"annotations": []

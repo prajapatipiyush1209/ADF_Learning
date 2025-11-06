@@ -117,7 +117,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "SELECT * FROM [@{variables('schema_name')}].[@{variables('table_name')}] \nWHERE order_date > '@{activity('Metadata of the Incremental Referesh').output.firstRow.last_refreshed}'",
+										"value": "SELECT * FROM [@{variables('schema_name')}].[@{variables('table_name')}] \nWHERE order_date > '@{activity('Metadata of the Incremental Referesh').output.firstRow.last_refreshed}",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -334,10 +334,59 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "pipeline_end_time",
+								"variableName": "activity_end_time",
 								"value": {
 									"value": "@utcNow()",
 									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "On Fail",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "End Time",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "log_record_pipeline",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"start_time": {
+										"value": "@formatDateTime(variables('activity_start_time'), 'yyyy-MM-dd HH:mm:ss')\n",
+										"type": "Expression"
+									},
+									"trigger_name": {
+										"value": "@pipeline().TriggerName",
+										"type": "Expression"
+									},
+									"trigger_type": {
+										"value": "@pipeline().TriggerType",
+										"type": "Expression"
+									},
+									"run_id": {
+										"value": "@pipeline().RunId",
+										"type": "Expression"
+									},
+									"endtime": {
+										"value": "@formatDateTime(variables('activity_end_time'), 'yyyy-MM-dd HH:mm:ss')\n",
+										"type": "Expression"
+									},
+									"error_message": {
+										"value": "@activity('Metadata of the Incremental Referesh').output.error[0].Message",
+										"type": "Expression"
+									}
 								}
 							}
 						}
