@@ -346,9 +346,9 @@
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "End Time",
+									"activity": "End Time_",
 									"dependencyConditions": [
-										"Failed"
+										"Succeeded"
 									]
 								}
 							],
@@ -387,6 +387,30 @@
 										"value": "@activity('Metadata of the Incremental Referesh').output.error[0].Message",
 										"type": "Expression"
 									}
+								}
+							}
+						},
+						{
+							"name": "End Time_",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Load Data",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "activity_end_time",
+								"value": {
+									"value": "@utcNow()",
+									"type": "Expression"
 								}
 							}
 						}
