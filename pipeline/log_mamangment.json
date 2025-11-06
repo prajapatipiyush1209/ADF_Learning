@@ -317,7 +317,9 @@
 									"error_message": {
 										"value": "''",
 										"type": "Expression"
-									}
+									},
+									"status": "Success",
+									"run_type": "Activity Run Type"
 								}
 							}
 						},
@@ -390,7 +392,12 @@
 									"error_message": {
 										"value": "@activity('Load Data').output.errors[0].Message  ",
 										"type": "Expression"
-									}
+									},
+									"status": {
+										"value": "Failed",
+										"type": "Expression"
+									},
+									"run_type": "Activity Run Type"
 								}
 							}
 						},
