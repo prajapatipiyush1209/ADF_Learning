@@ -277,7 +277,7 @@
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "Load Data",
+									"activity": "End Time",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -295,7 +295,7 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"start_time": {
-										"value": "@formatDateTime(variables('activity_start_time'), 'yyyy-MM-dd HH:mm:ss')\r\n",
+										"value": "@formatDateTime(variables('activity_start_time'), 'yyyy-MM-dd HH:mm:ss')\n",
 										"type": "Expression"
 									},
 									"trigger_name": {
@@ -309,7 +309,35 @@
 									"run_id": {
 										"value": "@pipeline().RunId",
 										"type": "Expression"
+									},
+									"endtime": {
+										"value": "@formatDateTime(variables('activity_end_time'), 'yyyy-MM-dd HH:mm:ss')\n",
+										"type": "Expression"
 									}
+								}
+							}
+						},
+						{
+							"name": "End Time",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Load Data",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "pipeline_end_time",
+								"value": {
+									"value": "@utcNow()",
+									"type": "Expression"
 								}
 							}
 						}
