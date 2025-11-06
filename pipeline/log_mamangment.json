@@ -312,25 +312,6 @@
 									}
 								}
 							}
-						},
-						{
-							"name": "On Fail Log",
-							"type": "ExecutePipeline",
-							"dependsOn": [
-								{
-									"activity": "Load Data",
-									"dependencyConditions": [
-										"Failed"
-									]
-								}
-							],
-							"policy": {
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"waitOnCompletion": true
-							}
 						}
 					]
 				}
