@@ -452,7 +452,7 @@
 					{
 						"activity": "If rows graterthan 0",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
