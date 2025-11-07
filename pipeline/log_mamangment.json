@@ -307,7 +307,7 @@
 										"type": "Expression"
 									},
 									"run_id": {
-										"value": "@pipeline().RunId",
+										"value": "@pipeline().GroupId",
 										"type": "Expression"
 									},
 									"endtime": {
@@ -382,7 +382,7 @@
 										"type": "Expression"
 									},
 									"run_id": {
-										"value": "@pipeline().RunId",
+										"value": "@pipeline().GroupId",
 										"type": "Expression"
 									},
 									"endtime": {
@@ -504,7 +504,7 @@
 							"type": "Expression"
 						},
 						"run_id": {
-							"value": "@pipeline().RunId",
+							"value": "@pipeline().GroupId",
 							"type": "Expression"
 						},
 						"endtime": {
