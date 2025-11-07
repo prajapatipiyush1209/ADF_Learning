@@ -462,7 +462,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"variableName": "activity_start_time",
+					"variableName": "pipeline_end_time",
 					"value": {
 						"value": "@utcNow()",
 						"type": "Expression"
