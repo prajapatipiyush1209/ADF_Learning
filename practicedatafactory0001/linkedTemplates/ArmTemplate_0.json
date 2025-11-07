@@ -756,7 +756,7 @@
 										"source": {
 											"type": "AzureSqlSource",
 											"sqlReaderQuery": {
-												"value": "SELECT * FROM [@{variables('schema_name')}].[@{variables('table_name')}] \nWHERE order_date > '@{activity('Metadata of the Incremental Referesh').output.firstRow.last_refreshed}",
+												"value": "SELECT * FROM [@{variables('schema_name')}].[@{variables('table_name')}] \nWHERE order_date > '@{activity('Metadata of the Incremental Referesh').output.firstRow.last_refreshed}'",
 												"type": "Expression"
 											},
 											"queryTimeout": "02:00:00",
@@ -950,7 +950,7 @@
 												"type": "Expression"
 											},
 											"run_id": {
-												"value": "@pipeline().RunId",
+												"value": "@pipeline().GroupId",
 												"type": "Expression"
 											},
 											"endtime": {
@@ -1025,7 +1025,7 @@
 												"type": "Expression"
 											},
 											"run_id": {
-												"value": "@pipeline().RunId",
+												"value": "@pipeline().GroupId",
 												"type": "Expression"
 											},
 											"endtime": {
@@ -1063,7 +1063,7 @@
 									"typeProperties": {
 										"variableName": "activity_end_time",
 										"value": {
-											"value": "@utcNow()",
+											"value": "@utcNow",
 											"type": "Expression"
 										}
 									}
@@ -1081,7 +1081,7 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"variableName": "activity_start_time",
+							"variableName": "pipeline_start_time",
 							"value": {
 								"value": "@utcNow()",
 								"type": "Expression"
@@ -1105,10 +1105,67 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"variableName": "activity_start_time",
+							"variableName": "pipeline_end_time",
 							"value": {
 								"value": "@utcNow()",
 								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Execute Log Pipeline",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Set EndTime of the Pipeline",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "log_record_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": false,
+							"parameters": {
+								"start_time": {
+									"value": "@formatDateTime(variables('pipeline_start_time'), 'yyyy-MM-dd HH:mm:ss')\n",
+									"type": "Expression"
+								},
+								"trigger_name": {
+									"value": "@pipeline().TriggerName",
+									"type": "Expression"
+								},
+								"trigger_type": {
+									"value": "@pipeline().TriggerType",
+									"type": "Expression"
+								},
+								"run_id": {
+									"value": "@pipeline().GroupId",
+									"type": "Expression"
+								},
+								"endtime": {
+									"value": "@formatDateTime(variables('pipeline_end_time'), 'yyyy-MM-dd HH:mm:ss')\n",
+									"type": "Expression"
+								},
+								"error_message": {
+									"value": "''",
+									"type": "Expression"
+								},
+								"status": {
+									"value": "Success",
+									"type": "Expression"
+								},
+								"run_type": {
+									"value": "Pipeline Run Type",
+									"type": "Expression"
+								}
 							}
 						}
 					}
@@ -1156,10 +1213,10 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/incremental_refresh_metadata')]",
 				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]",
+				"[concat(variables('factoryId'), '/pipelines/log_record_pipeline')]",
 				"[concat(variables('factoryId'), '/datasets/AzureSqlOrderTable')]",
 				"[concat(variables('factoryId'), '/datasets/Sales_Orders_Storage_Account')]",
-				"[concat(variables('factoryId'), '/datasets/empty_json')]",
-				"[concat(variables('factoryId'), '/pipelines/log_record_pipeline')]"
+				"[concat(variables('factoryId'), '/datasets/empty_json')]"
 			]
 		}
 	]
