@@ -438,7 +438,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"variableName": "activity_start_time",
+					"variableName": "pipeline_start_time",
 					"value": {
 						"value": "@utcNow()",
 						"type": "Expression"
@@ -489,7 +489,7 @@
 						"referenceName": "log_record_pipeline",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true,
+					"waitOnCompletion": false,
 					"parameters": {
 						"start_time": {
 							"value": "@formatDateTime(variables('pipeline_start_time'), 'yyyy-MM-dd HH:mm:ss')\n",
