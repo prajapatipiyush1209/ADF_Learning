@@ -743,7 +743,7 @@
 									"typeProperties": {
 										"variableName": "activity_end_time",
 										"value": {
-											"value": "@utcNow",
+											"value": "@utcNow()",
 											"type": "Expression"
 										}
 									}
