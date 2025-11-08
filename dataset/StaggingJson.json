@@ -1,0 +1,19 @@
+{
+	"name": "StaggingJson",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "StaggingJson",
+				"fileSystem": "csv-to-json-practical"
+			}
+		},
+		"schema": {}
+	}
+}

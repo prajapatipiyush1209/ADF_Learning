@@ -1,0 +1,79 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "CSV_TO_JSON",
+						"type": "DatasetReference"
+					},
+					"name": "CSVFiles"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "StaggingJson",
+						"type": "DatasetReference"
+					},
+					"name": "StaggingJson",
+					"description": "Store the stagging JSON file"
+				}
+			],
+			"transformations": [
+				{
+					"name": "CreateNewColumn",
+					"description": "Creating/updating the columns 'OrderID, CustomerID, CustomerName, Email, ProductID, ProductName, Category, UnitPrice, Quantity, TotalAmount, PaymentMode, Status, ShippedDate, DeliveryDate'"
+				},
+				{
+					"name": "NowAggregateProductDetails"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          OrderID as string,",
+				"          CustomerID as string,",
+				"          CustomerName as string,",
+				"          Email as string,",
+				"          ProductID as string,",
+				"          ProductName as string,",
+				"          Category as string,",
+				"          UnitPrice as string,",
+				"          Quantity as string,",
+				"          TotalAmount as string,",
+				"          PaymentMode as string,",
+				"          Status as string,",
+				"          ShippedDate as string,",
+				"          DeliveryDate as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> CSVFiles",
+				"CSVFiles derive(ProductDetails = @(ProductID=ProductID,",
+				"          ProductName=ProductName,",
+				"          Category=Category,",
+				"          UnitPrice=toFloat(UnitPrice),",
+				"          Quatity=toInteger(Quantity),",
+				"          TotalAmount=toFloat(TotalAmount),",
+				"          PaymentMode=PaymentMode,",
+				"          Status=Status,",
+				"          ShippedDate=toDate(ShippedDate),",
+				"          DeliveryDate=toDate(DeliveryDate))) ~> CreateNewColumn",
+				"CreateNewColumn aggregate(groupBy(OrderID,",
+				"          CustomerID,",
+				"          CustomerName,",
+				"          Email),",
+				"     ProductDetails = collect(ProductDetails)) ~> NowAggregateProductDetails",
+				"NowAggregateProductDetails sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> StaggingJson"
+			]
+		}
+	}
+}
