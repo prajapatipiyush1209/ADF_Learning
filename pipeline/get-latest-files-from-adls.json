@@ -19,7 +19,9 @@
 						"referenceName": "CSV_TO_JSON",
 						"type": "DatasetReference"
 					},
-					"fieldList": [],
+					"fieldList": [
+						"childItems"
+					],
 					"storeSettings": {
 						"type": "AzureBlobFSReadSettings",
 						"enablePartitionDiscovery": false
@@ -32,8 +34,6 @@
 			{
 				"name": "ForEach1",
 				"type": "ForEach",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Get Metadata1",
@@ -44,9 +44,14 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Metadata1').output.childItems",
+						"type": "Expression"
+					},
+					"isSequential": true,
 					"activities": [
 						{
-							"name": "Get Metadata2",
+							"name": "Get Metadata of csv file",
 							"type": "GetMetadata",
 							"dependsOn": [],
 							"policy": {
@@ -56,12 +61,183 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": []
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "Lates_Moified_File_Name",
+									"type": "DatasetReference",
+									"parameters": {
+										"File_Name": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								},
+								"fieldList": [
+									"itemName",
+									"lastModified"
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "If Condition1",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Get Metadata of csv file",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@greater(\n    formatDateTime(activity('Get Metadata of csv file').output.lastModified),\n    formatDateTime(variables('Modified_Time'))\n)\n",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "update the flag variable_copy1",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "File_Name",
+											"value": {
+												"value": "@activity('Get Metadata of csv file').output.itemName",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "update the flag variable_copy2",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "update the flag variable_copy1",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "Modified_Time",
+											"value": {
+												"value": "@activity('Get Metadata of csv file').output.lastModified",
+												"type": "Expression"
+											}
+										}
+									}
+								]
+							}
 						}
 					]
 				}
+			},
+			{
+				"name": "Copy_Latest_File_From_One_Folder_to_Another_copy1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Lates_Moified_File_Name",
+						"type": "DatasetReference",
+						"parameters": {
+							"File_Name": {
+								"value": "@variables('File_Name')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Store_Latest_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"Source_File_Name": {
+								"value": "@variables('File_Name')",
+								"type": "Expression"
+							}
+						}
+					}
+				]
 			}
 		],
+		"variables": {
+			"File_Name": {
+				"type": "String"
+			},
+			"Modified_Time": {
+				"type": "String",
+				"defaultValue": "1900-01-01"
+			}
+		},
 		"annotations": []
 	}
 }
