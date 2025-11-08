@@ -11,7 +11,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@convertTimeZone(utcNow(), 'UTC', 'India Standard Time')\n",
+					"value": "@concat(convertTimeZone(utcNow(), 'UTC', 'India Standard Time'),'StaggingFile'\n)",
 					"type": "Expression"
 				},
 				"folderPath": "StaggingJson",
