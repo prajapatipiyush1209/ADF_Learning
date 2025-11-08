@@ -11,7 +11,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@items().name\n",
+					"value": "name",
 					"type": "Expression"
 				},
 				"folderPath": "csv_fiiles",
