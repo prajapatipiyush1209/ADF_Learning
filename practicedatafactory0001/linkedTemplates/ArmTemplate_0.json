@@ -306,7 +306,185 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "orders_day1.csv",
+						"folderPath": "csv_fiiles",
+						"fileSystem": "csv-to-json-practical"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "OrderID",
+						"type": "String"
+					},
+					{
+						"name": "CustomerID",
+						"type": "String"
+					},
+					{
+						"name": "CustomerName",
+						"type": "String"
+					},
+					{
+						"name": "Email",
+						"type": "String"
+					},
+					{
+						"name": "ProductID",
+						"type": "String"
+					},
+					{
+						"name": "ProductName",
+						"type": "String"
+					},
+					{
+						"name": "Category",
+						"type": "String"
+					},
+					{
+						"name": "UnitPrice",
+						"type": "String"
+					},
+					{
+						"name": "Quantity",
+						"type": "String"
+					},
+					{
+						"name": "TotalAmount",
+						"type": "String"
+					},
+					{
+						"name": "PaymentMode",
+						"type": "String"
+					},
+					{
+						"name": "Status",
+						"type": "String"
+					},
+					{
+						"name": "ShippedDate",
+						"type": "String"
+					},
+					{
+						"name": "DeliveryDate",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Lates_Moified_File_Name')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"File_Name": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().File_Name",
+							"type": "Expression"
+						},
+						"folderPath": "csv_fiiles",
+						"fileSystem": "csv-to-json-practical"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "OrderID",
+						"type": "String"
+					},
+					{
+						"name": "CustomerID",
+						"type": "String"
+					},
+					{
+						"name": "CustomerName",
+						"type": "String"
+					},
+					{
+						"name": "Email",
+						"type": "String"
+					},
+					{
+						"name": "ProductID",
+						"type": "String"
+					},
+					{
+						"name": "ProductName",
+						"type": "String"
+					},
+					{
+						"name": "Category",
+						"type": "String"
+					},
+					{
+						"name": "UnitPrice",
+						"type": "String"
+					},
+					{
+						"name": "Quantity",
+						"type": "String"
+					},
+					{
+						"name": "TotalAmount",
+						"type": "String"
+					},
+					{
+						"name": "PaymentMode",
+						"type": "String"
+					},
+					{
+						"name": "Status",
+						"type": "String"
+					},
+					{
+						"name": "ShippedDate",
+						"type": "String"
+					},
+					{
+						"name": "DeliveryDate",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/NewUploadedJsonFile')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
 						"folderPath": "csv_fiiles",
 						"fileSystem": "csv-to-json-practical"
 					},
@@ -421,15 +599,43 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@concat(convertTimeZone(utcNow(), 'UTC', 'India Standard Time'),'StaggingFile'\n)",
-							"type": "Expression"
-						},
 						"folderPath": "StaggingJson",
 						"fileSystem": "csv-to-json-practical"
 					}
 				},
 				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Store_Latest_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Source_File_Name": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "store-latest-files"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
@@ -785,6 +991,262 @@
 				"[concat(variables('factoryId'), '/datasets/AzureSqlOrderTable')]",
 				"[concat(variables('factoryId'), '/datasets/Sales_Orders_Storage_Account')]",
 				"[concat(variables('factoryId'), '/datasets/empty_json')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/get-latest-files-from-adls')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "CSV_TO_JSON",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Metadata1').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Get Metadata of csv file",
+									"type": "GetMetadata",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "Lates_Moified_File_Name",
+											"type": "DatasetReference",
+											"parameters": {
+												"File_Name": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										},
+										"fieldList": [
+											"itemName",
+											"lastModified"
+										],
+										"storeSettings": {
+											"type": "AzureBlobFSReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										},
+										"formatSettings": {
+											"type": "DelimitedTextReadSettings"
+										}
+									}
+								},
+								{
+									"name": "If Condition1",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Get Metadata of csv file",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@greater(\n    formatDateTime(activity('Get Metadata of csv file').output.lastModified),\n    formatDateTime(variables('Modified_Time'))\n)\n",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "update the flag variable_copy1",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "File_Name",
+													"value": {
+														"value": "@activity('Get Metadata of csv file').output.itemName",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "update the flag variable_copy2",
+												"type": "SetVariable",
+												"dependsOn": [
+													{
+														"activity": "update the flag variable_copy1",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "Modified_Time",
+													"value": {
+														"value": "@activity('Get Metadata of csv file').output.lastModified",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Copy_Latest_File_From_One_Folder_to_Another_copy1",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "ForEach1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Lates_Moified_File_Name",
+								"type": "DatasetReference",
+								"parameters": {
+									"File_Name": {
+										"value": "@variables('File_Name')",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Store_Latest_File",
+								"type": "DatasetReference",
+								"parameters": {
+									"Source_File_Name": {
+										"value": "@variables('File_Name')",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"File_Name": {
+						"type": "String"
+					},
+					"Modified_Time": {
+						"type": "String",
+						"defaultValue": "1900-01-01"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/CSV_TO_JSON')]",
+				"[concat(variables('factoryId'), '/datasets/Lates_Moified_File_Name')]",
+				"[concat(variables('factoryId'), '/datasets/Store_Latest_File')]"
 			]
 		},
 		{
@@ -1386,6 +1848,13 @@
 								"type": "DatasetReference"
 							},
 							"name": "CSVFiles"
+						},
+						{
+							"dataset": {
+								"referenceName": "CSV_TO_JSON",
+								"type": "DatasetReference"
+							},
+							"name": "source1"
 						}
 					],
 					"sinks": [
@@ -1405,6 +1874,9 @@
 						},
 						{
 							"name": "NowAggregateProductDetails"
+						},
+						{
+							"name": "AppendtheMainJsonFile"
 						}
 					],
 					"scriptLines": [
@@ -1426,7 +1898,27 @@
 						"     ),",
 						"     allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> CSVFiles",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> CSVFiles",
+						"source(output(",
+						"          OrderID as string,",
+						"          CustomerID as string,",
+						"          CustomerName as string,",
+						"          Email as string,",
+						"          ProductID as string,",
+						"          ProductName as string,",
+						"          Category as string,",
+						"          UnitPrice as string,",
+						"          Quantity as string,",
+						"          TotalAmount as string,",
+						"          PaymentMode as string,",
+						"          Status as string,",
+						"          ShippedDate as string,",
+						"          DeliveryDate as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> source1",
 						"CSVFiles derive(ProductDetails = @(ProductID=ProductID,",
 						"          ProductName=ProductName,",
 						"          Category=Category,",
@@ -1442,8 +1934,11 @@
 						"          CustomerName,",
 						"          Email),",
 						"     ProductDetails = collect(ProductDetails)) ~> NowAggregateProductDetails",
-						"NowAggregateProductDetails sink(allowSchemaDrift: true,",
+						"NowAggregateProductDetails union(byName: false)~> AppendtheMainJsonFile",
+						"AppendtheMainJsonFile sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
+						"     filePattern:(concat(toString(fromUTC(currentTimestamp(), 'Asia/Kolkata')), '_StagingJson')\r",
+						"),",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
@@ -1467,7 +1962,16 @@
 					{
 						"name": "Data flow1",
 						"type": "ExecuteDataFlow",
-						"dependsOn": [],
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [
+							{
+								"activity": "MetaDataForCSVFiles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "0.12:00:00",
 							"retry": 0,
@@ -1483,6 +1987,7 @@
 								"parameters": {},
 								"datasetParameters": {
 									"CSVFiles": {},
+									"source1": {},
 									"StaggingJson": {}
 								}
 							},
@@ -1493,6 +1998,38 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "MetaDataForCSVFiles",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "NewUploadedJsonFile",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems",
+								"lastModified"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
 					}
 				],
 				"policy": {
@@ -1501,7 +2038,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/dataflow1')]"
+				"[concat(variables('factoryId'), '/dataflows/dataflow1')]",
+				"[concat(variables('factoryId'), '/datasets/NewUploadedJsonFile')]"
 			]
 		}
 	]
