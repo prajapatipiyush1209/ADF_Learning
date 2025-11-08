@@ -72,7 +72,8 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> StaggingJson"
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> StaggingJson"
 			]
 		}
 	}
