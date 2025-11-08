@@ -10,13 +10,6 @@
 						"type": "DatasetReference"
 					},
 					"name": "CSVFiles"
-				},
-				{
-					"dataset": {
-						"referenceName": "CSV_TO_JSON",
-						"type": "DatasetReference"
-					},
-					"name": "source1"
 				}
 			],
 			"sinks": [
@@ -62,25 +55,6 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     partitionBy('hash', 1)) ~> CSVFiles",
-				"source(output(",
-				"          OrderID as string,",
-				"          CustomerID as string,",
-				"          CustomerName as string,",
-				"          Email as string,",
-				"          ProductID as string,",
-				"          ProductName as string,",
-				"          Category as string,",
-				"          UnitPrice as string,",
-				"          Quantity as string,",
-				"          TotalAmount as string,",
-				"          PaymentMode as string,",
-				"          Status as string,",
-				"          ShippedDate as string,",
-				"          DeliveryDate as string",
-				"     ),",
-				"     allowSchemaDrift: true,",
-				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> source1",
 				"CSVFiles derive(ProductDetails = @(ProductID=ProductID,",
 				"          ProductName=ProductName,",
 				"          Category=Category,",
