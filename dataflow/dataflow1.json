@@ -68,6 +68,8 @@
 				"     ProductDetails = collect(ProductDetails)) ~> NowAggregateProductDetails",
 				"NowAggregateProductDetails sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     filePattern:(concat(toString(fromUTC(currentTimestamp(), 'Asia/Kolkata')), '_StagingJson')\r",
+				"),",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
