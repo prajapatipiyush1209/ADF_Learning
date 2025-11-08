@@ -10,6 +10,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@convertTimeZone(utcNow(), 'UTC', 'India Standard Time')\n",
+					"type": "Expression"
+				},
 				"folderPath": "StaggingJson",
 				"fileSystem": "csv-to-json-practical"
 			}
