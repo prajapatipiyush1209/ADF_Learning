@@ -293,6 +293,92 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/CSV_TO_JSON')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "orders_day1.csv",
+						"folderPath": "csv_fiiles",
+						"fileSystem": "csv-to-json-practical"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "OrderID",
+						"type": "String"
+					},
+					{
+						"name": "CustomerID",
+						"type": "String"
+					},
+					{
+						"name": "CustomerName",
+						"type": "String"
+					},
+					{
+						"name": "Email",
+						"type": "String"
+					},
+					{
+						"name": "ProductID",
+						"type": "String"
+					},
+					{
+						"name": "ProductName",
+						"type": "String"
+					},
+					{
+						"name": "Category",
+						"type": "String"
+					},
+					{
+						"name": "UnitPrice",
+						"type": "String"
+					},
+					{
+						"name": "Quantity",
+						"type": "String"
+					},
+					{
+						"name": "TotalAmount",
+						"type": "String"
+					},
+					{
+						"name": "PaymentMode",
+						"type": "String"
+					},
+					{
+						"name": "Status",
+						"type": "String"
+					},
+					{
+						"name": "ShippedDate",
+						"type": "String"
+					},
+					{
+						"name": "DeliveryDate",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Sales_Orders_Storage_Account')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -316,6 +402,34 @@
 					"compressionCodec": "snappy"
 				},
 				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/StaggingJson')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(convertTimeZone(utcNow(), 'UTC', 'India Standard Time'),'StaggingFile'\n)",
+							"type": "Expression"
+						},
+						"folderPath": "StaggingJson",
+						"fileSystem": "csv-to-json-practical"
+					}
+				},
+				"schema": {}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
@@ -1256,6 +1370,138 @@
 				"[concat(variables('factoryId'), '/datasets/AzureSqlOrderTable')]",
 				"[concat(variables('factoryId'), '/datasets/Sales_Orders_Storage_Account')]",
 				"[concat(variables('factoryId'), '/datasets/empty_json')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "CSV_TO_JSON",
+								"type": "DatasetReference"
+							},
+							"name": "CSVFiles"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "StaggingJson",
+								"type": "DatasetReference"
+							},
+							"name": "StaggingJson",
+							"description": "Store the stagging JSON file"
+						}
+					],
+					"transformations": [
+						{
+							"name": "CreateNewColumn",
+							"description": "Creating/updating the columns 'OrderID, CustomerID, CustomerName, Email, ProductID, ProductName, Category, UnitPrice, Quantity, TotalAmount, PaymentMode, Status, ShippedDate, DeliveryDate'"
+						},
+						{
+							"name": "NowAggregateProductDetails"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          OrderID as string,",
+						"          CustomerID as string,",
+						"          CustomerName as string,",
+						"          Email as string,",
+						"          ProductID as string,",
+						"          ProductName as string,",
+						"          Category as string,",
+						"          UnitPrice as string,",
+						"          Quantity as string,",
+						"          TotalAmount as string,",
+						"          PaymentMode as string,",
+						"          Status as string,",
+						"          ShippedDate as string,",
+						"          DeliveryDate as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> CSVFiles",
+						"CSVFiles derive(ProductDetails = @(ProductID=ProductID,",
+						"          ProductName=ProductName,",
+						"          Category=Category,",
+						"          UnitPrice=toFloat(UnitPrice),",
+						"          Quatity=toInteger(Quantity),",
+						"          TotalAmount=toFloat(TotalAmount),",
+						"          PaymentMode=PaymentMode,",
+						"          Status=Status,",
+						"          ShippedDate=toDate(ShippedDate),",
+						"          DeliveryDate=toDate(DeliveryDate))) ~> CreateNewColumn",
+						"CreateNewColumn aggregate(groupBy(OrderID,",
+						"          CustomerID,",
+						"          CustomerName,",
+						"          Email),",
+						"     ProductDetails = collect(ProductDetails)) ~> NowAggregateProductDetails",
+						"NowAggregateProductDetails sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> StaggingJson"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/CSV_TO_JSON')]",
+				"[concat(variables('factoryId'), '/datasets/StaggingJson')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/csv_to_json')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "dataflow1",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"CSVFiles": {},
+									"StaggingJson": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/dataflow1')]"
 			]
 		}
 	]
