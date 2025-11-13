@@ -1,0 +1,771 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "practicedatafactory0001"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/log_mamangment')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Metadata of the Incremental Referesh",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set Start Time of the Pipeline",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "incremental_refresh_metadata",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "Numbers of Rows",
+						"description": "To get the numbers of rows",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "Metadata of the Incremental Referesh",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "SELECT COUNT(*) AS total_count \nFROM [@{variables('schema_name')}].[@{variables('table_name')}] \nWHERE order_date > '@{activity('Metadata of the Incremental Referesh').output.firstRow.last_refreshed}'\n",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "If rows graterthan 0",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Numbers of Rows",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greater(activity('Numbers of Rows').output.resultSets[0].rows[0].total_count,0)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Load Data",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Start_Activity_Time",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "SELECT * FROM [@{variables('schema_name')}].[@{variables('table_name')}] \nWHERE order_date > '@{activity('Metadata of the Incremental Referesh').output.firstRow.last_refreshed}'",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "AzureSqlOrderTable",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Sales_Orders_Storage_Account",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								},
+								{
+									"name": "Max Date For Last Updated Date Data",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Load Data",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "SELECT MAX(order_date) as last_refreshed FROM [@{variables('schema_name')}].[@{variables('table_name')}]\nWHERE order_date > '@{activity('Metadata of the Incremental Referesh').output.firstRow.last_refreshed}'",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Update the CDC",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "Max Date For Last Updated Date Data",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "JsonSource",
+											"additionalColumns": [
+												{
+													"name": "last_refreshed",
+													"value": {
+														"value": "@activity('Max Date For Last Updated Date Data').output.resultSets[0].rows[0].last_refreshed",
+														"type": "Expression"
+													}
+												}
+											],
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "JsonReadSettings"
+											}
+										},
+										"sink": {
+											"type": "JsonSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "JsonWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "empty_json",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "incremental_refresh_metadata",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								},
+								{
+									"name": "Start_Activity_Time",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "activity_start_time",
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "On Success Log",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "End Time",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "log_record_pipeline",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"start_time": {
+												"value": "@formatDateTime(variables('activity_start_time'), 'yyyy-MM-dd HH:mm:ss')\n",
+												"type": "Expression"
+											},
+											"trigger_name": {
+												"value": "@pipeline().TriggerName",
+												"type": "Expression"
+											},
+											"trigger_type": {
+												"value": "@pipeline().TriggerType",
+												"type": "Expression"
+											},
+											"run_id": {
+												"value": "@pipeline().GroupId",
+												"type": "Expression"
+											},
+											"endtime": {
+												"value": "@formatDateTime(variables('activity_end_time'), 'yyyy-MM-dd HH:mm:ss')\n",
+												"type": "Expression"
+											},
+											"error_message": {
+												"value": "''",
+												"type": "Expression"
+											},
+											"status": "Success",
+											"run_type": "Activity Run Type"
+										}
+									}
+								},
+								{
+									"name": "End Time",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Load Data",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "activity_end_time",
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "On Fail",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "End Time_",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "log_record_pipeline",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"start_time": {
+												"value": "@formatDateTime(variables('activity_start_time'), 'yyyy-MM-dd HH:mm:ss')\n",
+												"type": "Expression"
+											},
+											"trigger_name": {
+												"value": "@pipeline().TriggerName",
+												"type": "Expression"
+											},
+											"trigger_type": {
+												"value": "@pipeline().TriggerType",
+												"type": "Expression"
+											},
+											"run_id": {
+												"value": "@pipeline().GroupId",
+												"type": "Expression"
+											},
+											"endtime": {
+												"value": "@formatDateTime(variables('activity_end_time'), 'yyyy-MM-dd HH:mm:ss')\n",
+												"type": "Expression"
+											},
+											"error_message": {
+												"value": "@activity('Load Data').output.errors[0].Message  ",
+												"type": "Expression"
+											},
+											"status": {
+												"value": "Failed",
+												"type": "Expression"
+											},
+											"run_type": "Activity Run Type"
+										}
+									}
+								},
+								{
+									"name": "End Time_",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Load Data",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "activity_end_time",
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Set Start Time of the Pipeline",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "pipeline_start_time",
+							"value": {
+								"value": "@utcNow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set EndTime of the Pipeline",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "If rows graterthan 0",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "pipeline_end_time",
+							"value": {
+								"value": "@utcNow()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Execute Log Pipeline",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Set EndTime of the Pipeline",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "log_record_pipeline",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": false,
+							"parameters": {
+								"start_time": {
+									"value": "@formatDateTime(variables('pipeline_start_time'), 'yyyy-MM-dd HH:mm:ss')\n",
+									"type": "Expression"
+								},
+								"trigger_name": {
+									"value": "@pipeline().TriggerName",
+									"type": "Expression"
+								},
+								"trigger_type": {
+									"value": "@pipeline().TriggerType",
+									"type": "Expression"
+								},
+								"run_id": {
+									"value": "@pipeline().GroupId",
+									"type": "Expression"
+								},
+								"endtime": {
+									"value": "@formatDateTime(variables('pipeline_end_time'), 'yyyy-MM-dd HH:mm:ss')\n",
+									"type": "Expression"
+								},
+								"error_message": {
+									"value": "''",
+									"type": "Expression"
+								},
+								"status": {
+									"value": "Success",
+									"type": "Expression"
+								},
+								"run_type": {
+									"value": "Pipeline Run Type",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"schema_name": {
+						"type": "String",
+						"defaultValue": "sales"
+					},
+					"table_name": {
+						"type": "String",
+						"defaultValue": "Orders"
+					},
+					"pipeline_start_time": {
+						"type": "String"
+					},
+					"pipeline_end_time": {
+						"type": "String"
+					},
+					"pipeline_error_message": {
+						"type": "String"
+					},
+					"run_type": {
+						"type": "String"
+					},
+					"activity_name": {
+						"type": "String"
+					},
+					"activity_start_time": {
+						"type": "String"
+					},
+					"activity_end_time": {
+						"type": "String"
+					},
+					"activity_error_message": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-11-03T12:05:34Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CSV_to_JSON')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "CSV_TO_JSON",
+								"type": "DatasetReference"
+							},
+							"name": "CSVFiles"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "StaggingJson",
+								"type": "DatasetReference"
+							},
+							"name": "StaggingJson",
+							"description": "Store the stagging JSON file"
+						}
+					],
+					"transformations": [
+						{
+							"name": "CreateNewColumn",
+							"description": "Creating/updating the columns 'OrderID, CustomerID, CustomerName, Email, ProductID, ProductName, Category, UnitPrice, Quantity, TotalAmount, PaymentMode, Status, ShippedDate, DeliveryDate'"
+						},
+						{
+							"name": "NowAggregateProductDetails"
+						},
+						{
+							"name": "AppendtheMainJsonFile"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          OrderID as string,",
+						"          CustomerID as string,",
+						"          CustomerName as string,",
+						"          Email as string,",
+						"          ProductID as string,",
+						"          ProductName as string,",
+						"          Category as string,",
+						"          UnitPrice as string,",
+						"          Quantity as string,",
+						"          TotalAmount as string,",
+						"          PaymentMode as string,",
+						"          Status as string,",
+						"          ShippedDate as string,",
+						"          DeliveryDate as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> CSVFiles",
+						"CSVFiles derive(ProductDetails = @(ProductID=ProductID,",
+						"          ProductName=ProductName,",
+						"          Category=Category,",
+						"          UnitPrice=toFloat(UnitPrice),",
+						"          Quatity=toInteger(Quantity),",
+						"          TotalAmount=toFloat(TotalAmount),",
+						"          PaymentMode=PaymentMode,",
+						"          Status=Status,",
+						"          ShippedDate=toDate(ShippedDate),",
+						"          DeliveryDate=toDate(DeliveryDate))) ~> CreateNewColumn",
+						"CreateNewColumn aggregate(groupBy(OrderID,",
+						"          CustomerID,",
+						"          CustomerName,",
+						"          Email),",
+						"     ProductDetails = collect(ProductDetails)) ~> NowAggregateProductDetails",
+						"NowAggregateProductDetails union(byName: false)~> AppendtheMainJsonFile",
+						"AppendtheMainJsonFile sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     filePattern:(concat(toString(fromUTC(currentTimestamp(), 'Asia/Kolkata')), '_StagingJson')\r",
+						"),",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> StaggingJson"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/csv_to_json')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [
+							{
+								"activity": "MetaDataForCSVFiles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "CSV_to_JSON",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"CSVFiles": {},
+									"StaggingJson": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "MetaDataForCSVFiles",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "NewUploadedJsonFile",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems",
+								"lastModified"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/CSV_to_JSON')]"
+			]
+		}
+	]
+}
