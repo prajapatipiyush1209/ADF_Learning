@@ -215,6 +215,90 @@
 													"enableStaging": false,
 													"translator": {
 														"type": "TabularTranslator",
+														"mappings": [
+															{
+																"source": {
+																	"name": "Month",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Month",
+																	"type": "String",
+																	"physicalType": "nvarchar"
+																}
+															},
+															{
+																"source": {
+																	"name": "Rent",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Rent",
+																	"type": "Decimal",
+																	"physicalType": "decimal",
+																	"scale": 2,
+																	"precision": 10
+																}
+															},
+															{
+																"source": {
+																	"name": "Utilities",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Utilities",
+																	"type": "Decimal",
+																	"physicalType": "decimal",
+																	"scale": 2,
+																	"precision": 10
+																}
+															},
+															{
+																"source": {
+																	"name": "Supplies",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Supplies",
+																	"type": "Decimal",
+																	"physicalType": "decimal",
+																	"scale": 2,
+																	"precision": 10
+																}
+															},
+															{
+																"source": {
+																	"name": "Travel",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Travel",
+																	"type": "Decimal",
+																	"physicalType": "decimal",
+																	"scale": 2,
+																	"precision": 10
+																}
+															},
+															{
+																"source": {
+																	"name": "Total",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Total",
+																	"type": "Decimal",
+																	"physicalType": "decimal",
+																	"scale": 2,
+																	"precision": 10
+																}
+															}
+														],
 														"typeConversion": true,
 														"typeConversionSettings": {
 															"allowDataTruncation": true,
