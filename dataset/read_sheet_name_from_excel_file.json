@@ -15,9 +15,12 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@dataset().Excel_File_Name",
+					"type": "Expression"
+				},
 				"fileSystem": "excel-sheet-having-multiple-sheets"
 			},
-			"sheetIndex": 0,
 			"firstRowAsHeader": true
 		},
 		"schema": [
