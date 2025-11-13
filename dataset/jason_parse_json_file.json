@@ -1,0 +1,67 @@
+{
+	"name": "jason_parse_json_file",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "Dummy Json File.json",
+				"folderPath": "json_file",
+				"fileSystem": "parse-json-tocsv"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"employees": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"name": {
+								"type": "string"
+							},
+							"age": {
+								"type": "integer"
+							},
+							"email": {
+								"type": "string"
+							},
+							"isActive": {
+								"type": "boolean"
+							},
+							"skills": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								}
+							},
+							"address": {
+								"type": "object",
+								"properties": {
+									"street": {
+										"type": "string"
+									},
+									"city": {
+										"type": "string"
+									},
+									"state": {
+										"type": "string"
+									},
+									"zipCode": {
+										"type": "string"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
