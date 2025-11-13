@@ -48,6 +48,7 @@
 						"value": "@if(equals(activity('Get Metadata1').output.itemType, 'Folder'),\n    activity('Get Metadata1').output.childItems,\n    [])\n",
 						"type": "Expression"
 					},
+					"isSequential": true,
 					"activities": [
 						{
 							"name": "Get Metadata2",
