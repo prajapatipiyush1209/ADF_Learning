@@ -1,5 +1,5 @@
 {
-	"name": "pipeline1",
+	"name": "sheet_dump_in_sql_child_pipeline_from_dump_excel_to_sql",
 	"properties": {
 		"activities": [
 			{
@@ -53,7 +53,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"on": {
-									"value": "@item().name",
+									"value": "@item().SheetName",
 									"type": "Expression"
 								},
 								"cases": [
@@ -90,6 +90,70 @@
 													"enableStaging": false,
 													"translator": {
 														"type": "TabularTranslator",
+														"mappings": [
+															{
+																"source": {
+																	"name": "ID",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "EmployeeID",
+																	"type": "Int32",
+																	"physicalType": "int"
+																}
+															},
+															{
+																"source": {
+																	"name": "Name",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "EmployeeName",
+																	"type": "String",
+																	"physicalType": "nvarchar"
+																}
+															},
+															{
+																"source": {
+																	"name": "Department",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Department",
+																	"type": "String",
+																	"physicalType": "nvarchar"
+																}
+															},
+															{
+																"source": {
+																	"name": "Salary",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Salary",
+																	"type": "Decimal",
+																	"physicalType": "decimal",
+																	"scale": 2,
+																	"precision": 10
+																}
+															},
+															{
+																"source": {
+																	"name": "Join Date",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "JoinDate",
+																	"type": "Date",
+																	"physicalType": "date"
+																}
+															}
+														],
 														"typeConversion": true,
 														"typeConversionSettings": {
 															"allowDataTruncation": true,
@@ -212,6 +276,70 @@
 													"enableStaging": false,
 													"translator": {
 														"type": "TabularTranslator",
+														"mappings": [
+															{
+																"source": {
+																	"name": "Item",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "ItemName",
+																	"type": "String",
+																	"physicalType": "nvarchar"
+																}
+															},
+															{
+																"source": {
+																	"name": "Category",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Category",
+																	"type": "String",
+																	"physicalType": "nvarchar"
+																}
+															},
+															{
+																"source": {
+																	"name": "Quantity",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Quantity",
+																	"type": "Int32",
+																	"physicalType": "int"
+																}
+															},
+															{
+																"source": {
+																	"name": "Unit Cost",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "UnitCost",
+																	"type": "Decimal",
+																	"physicalType": "decimal",
+																	"scale": 2,
+																	"precision": 10
+																}
+															},
+															{
+																"source": {
+																	"name": "Reorder Level",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "ReorderLevel",
+																	"type": "Int32",
+																	"physicalType": "int"
+																}
+															}
+														],
 														"typeConversion": true,
 														"typeConversionSettings": {
 															"allowDataTruncation": true,
@@ -273,6 +401,60 @@
 													"enableStaging": false,
 													"translator": {
 														"type": "TabularTranslator",
+														"mappings": [
+															{
+																"source": {
+																	"name": "Date",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "SalesDate",
+																	"type": "Date",
+																	"physicalType": "date"
+																}
+															},
+															{
+																"source": {
+																	"name": "Quantity",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Quantity",
+																	"type": "Int32",
+																	"physicalType": "int"
+																}
+															},
+															{
+																"source": {
+																	"name": "Price",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Price",
+																	"type": "Decimal",
+																	"physicalType": "decimal",
+																	"scale": 2,
+																	"precision": 10
+																}
+															},
+															{
+																"source": {
+																	"name": "Total",
+																	"type": "String",
+																	"physicalType": "String"
+																},
+																"sink": {
+																	"name": "Total",
+																	"type": "Decimal",
+																	"physicalType": "decimal",
+																	"scale": 2,
+																	"precision": 10
+																}
+															}
+														],
 														"typeConversion": true,
 														"typeConversionSettings": {
 															"allowDataTruncation": true,
