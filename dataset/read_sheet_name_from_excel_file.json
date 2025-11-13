@@ -21,6 +21,10 @@
 				},
 				"fileSystem": "excel-sheet-having-multiple-sheets"
 			},
+			"sheetIndex": {
+				"value": "@int(0)",
+				"type": "Expression"
+			},
 			"firstRowAsHeader": true
 		},
 		"schema": [
