@@ -1,0 +1,27 @@
+{
+	"name": "csv_file_after_json_parse",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@concat(utcNow(), '-Json-Parse-to-CSV')",
+					"type": "Expression"
+				},
+				"folderPath": "csv_file_after_parsing",
+				"fileSystem": "parse-json-tocsv"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
