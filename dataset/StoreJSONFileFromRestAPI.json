@@ -1,0 +1,20 @@
+{
+	"name": "StoreJSONFileFromRestAPI",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "DataFromRestAPIas Json",
+				"folderPath": "DataFromRestAPIas Json",
+				"fileSystem": "parse-json-tocsv"
+			}
+		},
+		"schema": {}
+	}
+}
