@@ -762,7 +762,7 @@
 				"annotations": [],
 				"type": "RestResource",
 				"typeProperties": {
-					"relativeUrl": "/me"
+					"relativeUrl": "/login"
 				},
 				"schema": []
 			},
