@@ -22,6 +22,9 @@
 		},
 		"AzureSqlDatabase_properties_typeProperties_userName": {
 			"value": "learningsqlsever"
+		},
+		"RestService1_properties_typeProperties_url": {
+			"value": "https://dummyjson.com"
 		}
 	}
 }

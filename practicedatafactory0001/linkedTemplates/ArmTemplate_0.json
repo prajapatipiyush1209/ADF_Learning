@@ -30,6 +30,10 @@
 		"AzureSqlDatabase_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "learningsqlsever"
+		},
+		"RestService1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://dummyjson.com"
 		}
 	},
 	"variables": {
@@ -74,6 +78,21 @@
 					"alwaysEncryptedSettings": {
 						"alwaysEncryptedAkvAuthType": "ManagedIdentity"
 					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RestService1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('RestService1_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
 				}
 			},
 			"dependsOn": []
@@ -732,6 +751,24 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/RestAPI')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "RestService1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/RestService1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Sales_Dump')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -834,6 +871,31 @@
 						"type": "AzureBlobFSLocation",
 						"folderPath": "StaggingJson",
 						"fileSystem": "csv-to-json-practical"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/StoreJSONFileFromRestAPI')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "DataFromRestAPIas Json",
+						"folderPath": "DataFromRestAPIas Json",
+						"fileSystem": "parse-json-tocsv"
 					}
 				},
 				"schema": {}
@@ -963,153 +1025,6 @@
 					"quoteChar": "\""
 				},
 				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/getfilesnames_for_count')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureDataLakeStorage",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileSystem": "incremental-refersh"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/incremental_refresh_metadata')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureDataLakeStorage",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Json",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "incremental_refresh_metadata.json",
-						"fileSystem": "incremental-refersh"
-					}
-				},
-				"schema": {
-					"type": "object",
-					"properties": {
-						"tables": {
-							"type": "array",
-							"items": {
-								"type": "object",
-								"properties": {
-									"schema_name": {
-										"type": "string"
-									},
-									"table_name": {
-										"type": "string"
-									},
-									"last_refreshed": {
-										"type": "string"
-									},
-									"enable_back_refresh": {
-										"type": "boolean"
-									}
-								}
-							}
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/jason_parse_json_file')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureDataLakeStorage",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Json",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "Dummy Json File.json",
-						"folderPath": "json_file",
-						"fileSystem": "parse-json-tocsv"
-					}
-				},
-				"schema": {
-					"type": "object",
-					"properties": {
-						"employees": {
-							"type": "array",
-							"items": {
-								"type": "object",
-								"properties": {
-									"name": {
-										"type": "string"
-									},
-									"age": {
-										"type": "integer"
-									},
-									"email": {
-										"type": "string"
-									},
-									"isActive": {
-										"type": "boolean"
-									},
-									"skills": {
-										"type": "array",
-										"items": {
-											"type": "string"
-										}
-									},
-									"address": {
-										"type": "object",
-										"properties": {
-											"street": {
-												"type": "string"
-											},
-											"city": {
-												"type": "string"
-											},
-											"state": {
-												"type": "string"
-											},
-											"zipCode": {
-												"type": "string"
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
