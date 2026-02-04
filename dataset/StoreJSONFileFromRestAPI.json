@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "DataFromRestAPIas Json",
+				"fileName": "DataFromRestAPIasJson.json",
 				"folderPath": "DataFromRestAPIas Json",
 				"fileSystem": "parse-json-tocsv"
 			}

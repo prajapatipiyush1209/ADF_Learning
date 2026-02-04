@@ -54,12 +54,9 @@
 						"requestMethod": "GET",
 						"additionalHeaders": {
 							"Authorization": {
-								"value": "@concat('Bearer ', activity('Web1').output.accessToken)\n",
+								"value": "Bearer @{activity('Web1').output.accessToken}\n",
 								"type": "Expression"
 							}
-						},
-						"paginationRules": {
-							"supportRFC5988": "true"
 						}
 					},
 					"sink": {
