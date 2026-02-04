@@ -33,7 +33,7 @@
 		},
 		"RestService1_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://dummyjson.com"
+			"defaultValue": "https://dummyjson.com/auth/"
 		},
 		"containerUri": {
 			"type": "string",

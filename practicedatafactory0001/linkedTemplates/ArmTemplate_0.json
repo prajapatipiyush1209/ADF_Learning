@@ -33,7 +33,7 @@
 		},
 		"RestService1_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://dummyjson.com"
+			"defaultValue": "https://dummyjson.com/auth/"
 		}
 	},
 	"variables": {
@@ -761,7 +761,9 @@
 				},
 				"annotations": [],
 				"type": "RestResource",
-				"typeProperties": {},
+				"typeProperties": {
+					"relativeUrl": "/me"
+				},
 				"schema": []
 			},
 			"dependsOn": [
@@ -893,7 +895,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "DataFromRestAPIas Json",
+						"fileName": "DataFromRestAPIasJson.json",
 						"folderPath": "DataFromRestAPIas Json",
 						"fileSystem": "parse-json-tocsv"
 					}

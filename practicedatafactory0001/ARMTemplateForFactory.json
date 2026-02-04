@@ -33,7 +33,7 @@
 		},
 		"RestService1_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://dummyjson.com"
+			"defaultValue": "https://dummyjson.com/auth/"
 		}
 	},
 	"variables": {
@@ -98,12 +98,9 @@
 								"requestMethod": "GET",
 								"additionalHeaders": {
 									"Authorization": {
-										"value": "@concat('Bearer ', activity('Web1').output.access_token)\r\n",
+										"value": "Bearer @{activity('Web1').output.accessToken}\n",
 										"type": "Expression"
 									}
-								},
-								"paginationRules": {
-									"supportRFC5988": "true"
 								}
 							},
 							"sink": {
@@ -3019,7 +3016,9 @@
 				},
 				"annotations": [],
 				"type": "RestResource",
-				"typeProperties": {},
+				"typeProperties": {
+					"relativeUrl": "/me"
+				},
 				"schema": []
 			},
 			"dependsOn": [
@@ -3151,7 +3150,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "DataFromRestAPIas Json",
+						"fileName": "DataFromRestAPIasJson.json",
 						"folderPath": "DataFromRestAPIas Json",
 						"fileSystem": "parse-json-tocsv"
 					}
