@@ -45,12 +45,13 @@
 				"          email as string,",
 				"          age as string",
 				"     ),",
-				"     partitionFileNames:[''],",
+				"     partitionFileNames:['demo.csv'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> StoreToDestination"
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> StoreToDestination"
 			]
 		}
 	}
