@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "output.csv",
+				"fileName": "demo.csv",
 				"folderPath": "Destination",
 				"fileSystem": "schema-drifting"
 			},
