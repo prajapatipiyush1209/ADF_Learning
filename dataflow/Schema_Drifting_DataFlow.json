@@ -18,7 +18,11 @@
 						"referenceName": "StoreToDestination_Schema_Drifting",
 						"type": "DatasetReference"
 					},
-					"name": "StoreToDestination"
+					"name": "StoreToDestination",
+					"rejectedDataLinkedService": {
+						"referenceName": "AzureDataLakeStorage",
+						"type": "LinkedServiceReference"
+					}
 				}
 			],
 			"transformations": [],
